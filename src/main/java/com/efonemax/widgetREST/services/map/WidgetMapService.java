@@ -43,7 +43,7 @@ public class WidgetMapService implements WidgetService {
         idZIndexMap.remove(id);
         if (removedWidget.getZIndex() == maxZIndex.get()) {
             updateMaxZIndexValue();
-        };
+        }
     }
 
     @Override
@@ -98,19 +98,17 @@ public class WidgetMapService implements WidgetService {
     private void updateZIndexes(Widget widget) {
         if (widget.getZIndex() == null) {
             widget.setZIndex(maxZIndex.addAndGet(1));
-            idZIndexMap.put(widget.getId(), widget.getZIndex());
         } else {
             if (idZIndexMap.containsValue(widget.getZIndex())) {
                 getKeyByValue(idZIndexMap, widget.getZIndex()).ifPresent(key -> {
                             Widget needToIncreaseZWidget = idWidgetMap.get(key);
                             needToIncreaseZWidget.setZIndex(widget.getZIndex() + 1);
                             createOrUpdate(needToIncreaseZWidget);
-                            idZIndexMap.put(widget.getId(), widget.getZIndex());
                         }
                 );
-            } else {
-                idZIndexMap.put(widget.getId(), widget.getZIndex());
             }
+
         }
+        idZIndexMap.put(widget.getId(), widget.getZIndex());
     }
 }
