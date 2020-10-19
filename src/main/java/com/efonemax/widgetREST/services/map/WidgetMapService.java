@@ -1,6 +1,8 @@
 package com.efonemax.widgetREST.services.map;
 
 import com.efonemax.widgetREST.domain.Widget;
+import com.efonemax.widgetREST.field.Field;
+import com.efonemax.widgetREST.field.Point;
 import com.efonemax.widgetREST.services.WidgetService;
 import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Service;
@@ -12,6 +14,7 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
@@ -22,6 +25,7 @@ public class WidgetMapService implements WidgetService {
     private Map<Long, Widget> idWidgetMap = new ConcurrentHashMap<>();
     private Map<Long, Integer> idZIndexMap = new ConcurrentHashMap<>();
     private AtomicInteger maxZIndex = new AtomicInteger();
+    private Field field = Field.getInstance();
 
     @Override
     public Widget create(Widget widget) {
@@ -60,6 +64,15 @@ public class WidgetMapService implements WidgetService {
                 .collect(Collectors.toList());
     }
 
+    @Override
+    public List<Widget> filterWidgetsByCoordinates(Point lowerLeftPoint, Point upperRightPoint) throws CloneNotSupportedException {
+        Set<Long> widgetIdsByCoordinates = field.getWidgetIdsByCoordinates(lowerLeftPoint, upperRightPoint);
+        return idWidgetMap.entrySet().stream()
+                .filter(entry -> widgetIdsByCoordinates.contains(entry.getKey()))
+                .map(Map.Entry::getValue)
+                .collect(Collectors.toList());
+    }
+
     private Long getNextId() {
         return idWidgetMap.keySet().isEmpty() ? 1L : Collections.max(idWidgetMap.keySet()) + 1;
     }
@@ -76,6 +89,7 @@ public class WidgetMapService implements WidgetService {
         updateZIndexes(widget);
         widget.setDateTime(LocalDateTime.now());
         idWidgetMap.put(widget.getId(), widget);
+        field.update(widget);
 
         return widget;
     }
