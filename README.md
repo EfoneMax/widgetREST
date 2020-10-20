@@ -17,7 +17,7 @@ requestBody
 ]
 -для фильтрации по области
 
-{    
+{
     "width": 3,
     "height": 3,
     "zindex": 1,
