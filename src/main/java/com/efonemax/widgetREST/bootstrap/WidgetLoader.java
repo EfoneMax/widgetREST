@@ -2,6 +2,7 @@ package com.efonemax.widgetREST.bootstrap;
 
 import com.efonemax.widgetREST.domain.Widget;
 import com.efonemax.widgetREST.services.WidgetService;
+import lombok.SneakyThrows;
 import org.springframework.context.ApplicationListener;
 import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.stereotype.Component;
@@ -14,6 +15,7 @@ public class WidgetLoader implements ApplicationListener<ContextRefreshedEvent> 
         this.service = service;
     }
 
+    @SneakyThrows
     @Override
     public void onApplicationEvent(ContextRefreshedEvent event) {
         Widget firstWidget = Widget.builder()

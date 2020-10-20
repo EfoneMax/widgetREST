@@ -14,4 +14,9 @@ import lombok.Setter;
 public class Point {
     private int x;
     private int y;
+
+    public void increasePCoordinatesBy500() {
+        this.x = x + 500;
+        this.y = y + 500;
+    }
 }

@@ -18,6 +18,7 @@ public class Rectangle implements Cloneable {
         upperLeftCorner = new Point(lowerLeftCorner.getX(), upperRightCorner.getY());
         this.upperRightCorner = upperRightCorner;
         lowerRightCorner = new Point(upperRightCorner.getX(), lowerLeftCorner.getY());
+        increaseRectangleCoordinatesBy500();
     }
 
     public int getWidth() {
@@ -44,5 +45,12 @@ public class Rectangle implements Cloneable {
 
         lowerRightCorner.setX(lowerRightCorner.getX() + 1);
         lowerRightCorner.setY(lowerRightCorner.getY() - 1);
+    }
+
+    private void increaseRectangleCoordinatesBy500() {
+        this.getLowerLeftCorner().increasePCoordinatesBy500();
+        this.getUpperLeftCorner().increasePCoordinatesBy500();
+        this.getUpperRightCorner().increasePCoordinatesBy500();
+        this.getLowerRightCorner().increasePCoordinatesBy500();
     }
 }

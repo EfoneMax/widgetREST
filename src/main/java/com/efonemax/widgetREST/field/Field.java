@@ -95,12 +95,24 @@ public final class Field {
         Set<Integer> widgetIds = new HashSet<>();
 
         if (p1.getX() == p2.getX()) {
-            for (int y = p1.getY(); y <= p2.getY(); y++) {
-                widgetIds.addAll(intArrayToList(fieldArray[p1.getX()][y]));
+            if (p1.getY() < p2.getY()) {
+                for (int y = p1.getY(); y <= p2.getY(); y++) {
+                    widgetIds.addAll(intArrayToList(fieldArray[p1.getX()][y]));
+                }
+            } else {
+                for (int y = p2.getY(); y <= p1.getY(); y++) {
+                    widgetIds.addAll(intArrayToList(fieldArray[p1.getX()][y]));
+                }
             }
         } else if (p1.getY() == p2.getY()) {
-            for (int x = p1.getX(); x <= p2.getX(); x++) {
-                widgetIds.addAll(intArrayToList(fieldArray[x][p1.getY()]));
+            if (p1.getX() < p2.getX()) {
+                for (int x = p1.getX(); x <= p2.getX(); x++) {
+                    widgetIds.addAll(intArrayToList(fieldArray[x][p1.getY()]));
+                }
+            } else {
+                for (int x = p2.getX(); x <= p1.getX(); x++) {
+                    widgetIds.addAll(intArrayToList(fieldArray[x][p1.getY()]));
+                }
             }
         } else {
             throw new RuntimeException("The line between the points must be vertical or horizontal");

@@ -6,13 +6,13 @@ import com.efonemax.widgetREST.field.Point;
 import java.util.List;
 
 public interface WidgetService {
-    Widget create(Widget widget);
+    Widget create(Widget widget) throws CloneNotSupportedException;
 
-    Widget update(Integer id, Widget widget);
+    Widget update(Integer id, Widget widget) throws CloneNotSupportedException;
 
     void delete(Integer id);
 
-    Widget get(Integer id);
+    Widget get(Integer id) throws CloneNotSupportedException;
 
     /*
      * pagination implementation

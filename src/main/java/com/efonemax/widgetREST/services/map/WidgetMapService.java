@@ -9,8 +9,10 @@ import org.springframework.stereotype.Service;
 
 import javax.validation.constraints.Min;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -28,32 +30,48 @@ public class WidgetMapService implements WidgetService {
     private Field field = Field.getInstance();
 
     @Override
-    public Widget create(Widget widget) {
-        return createOrUpdate(widget);
+    public Widget create(Widget widget) throws CloneNotSupportedException {
+        Widget savedWidget = createOrUpdate(widget);
+        Widget cWidget = savedWidget.clone();
+        decreaseWidgetCoordinates(cWidget);
+        return cWidget;
     }
 
     @Override
-    public Widget update(Integer id, Widget widget) {
+    public Widget update(Integer id, Widget widget) throws CloneNotSupportedException {
         if (id == null) {
             throw new RuntimeException("Widget id cannot be empty");
         }
         widget.setId(id);
-        return createOrUpdate(widget);
+        Widget savedWidget = createOrUpdate(widget);
+        Widget cWidget = savedWidget.clone();
+        decreaseWidgetCoordinates(cWidget);
+        return cWidget;
     }
 
     @Override
     public synchronized void delete(@Min(1) Integer id) {
         Widget widgetToDelete = idWidgetMap.remove(id);
-        idZIndexMap.remove(id);
-        field.erase(widgetToDelete);
-        if (widgetToDelete.getZIndex() == maxZIndex.get()) {
-            updateMaxZIndexValue();
+        if (widgetToDelete != null) {
+            idZIndexMap.remove(id);
+            increaseWidgetCoordinates(widgetToDelete);
+            field.erase(widgetToDelete);
+            if (widgetToDelete.getZIndex() == maxZIndex.get()) {
+                updateMaxZIndexValue();
+            }
         }
     }
 
     @Override
-    public Widget get(@Min(1) Integer id) {
-        return idWidgetMap.get(id);
+    public Widget get(@Min(1) Integer id) throws CloneNotSupportedException {
+        Widget widget = idWidgetMap.get(id);
+        if (widget != null) {
+            Widget wClone = widget.clone();
+            decreaseWidgetCoordinates(wClone);
+            return wClone;
+        }
+
+        return new Widget();
     }
 
     @Override
@@ -68,10 +86,19 @@ public class WidgetMapService implements WidgetService {
     @Override
     public List<Widget> filterWidgetsByCoordinates(Point lowerLeftPoint, Point upperRightPoint) throws CloneNotSupportedException {
         Set<Integer> widgetIdsByCoordinates = field.getWidgetIdsContainedInTheSubfield(lowerLeftPoint, upperRightPoint);
-        return idWidgetMap.entrySet().stream()
+        List<Widget> widgetList = idWidgetMap.entrySet().stream()
                 .filter(entry -> widgetIdsByCoordinates.contains(entry.getKey()))
                 .map(Map.Entry::getValue)
                 .collect(Collectors.toList());
+
+        List<Widget> widgetListClone = new ArrayList<>();
+        for (Widget widget : widgetList) {
+            Widget wClone = widget.clone();
+            decreaseWidgetCoordinates(wClone);
+            widgetListClone.add(wClone);
+        }
+
+        return widgetListClone;
     }
 
     private Integer getNextId() {
@@ -79,6 +106,9 @@ public class WidgetMapService implements WidgetService {
     }
 
     private synchronized Widget createOrUpdate(Widget widget) {
+        if(!widget.isHavePlus500ToCoordinates()) {
+            increaseWidgetCoordinates(widget);
+        }
         if (widget == null) {
             throw new RuntimeException("Widget cannot be null");
         }
@@ -126,5 +156,26 @@ public class WidgetMapService implements WidgetService {
 
         }
         idZIndexMap.put(widget.getId(), widget.getZIndex());
+    }
+
+    private void increaseWidgetCoordinates(Widget widget) {
+        if (!widget.isHavePlus500ToCoordinates()) {
+            shiftCoordinatesBy500Points(widget, true);
+            widget.setHavePlus500ToCoordinates(true);
+        }
+    }
+
+    private void decreaseWidgetCoordinates(Widget widget) {
+        if (widget.isHavePlus500ToCoordinates()) {
+            shiftCoordinatesBy500Points(widget, false);
+            widget.setHavePlus500ToCoordinates(false);
+        }
+    }
+
+    private void shiftCoordinatesBy500Points(Widget widget, boolean plus) {
+        int value = plus ? 500 : -500;
+        widget.setXIndex(widget.getXIndex() + value);
+        widget.setYIndex(widget.getYIndex() + value);
+        widget.setZIndex(widget.getZIndex() + value);
     }
 }

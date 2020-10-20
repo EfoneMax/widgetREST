@@ -28,13 +28,13 @@ public class WidgetController {
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public Widget createWidget(@Valid @RequestBody Widget widget) {
+    public Widget createWidget(@Valid @RequestBody Widget widget) throws CloneNotSupportedException {
         return service.create(widget);
     }
 
     @PutMapping("/{id}")
     @ResponseStatus(HttpStatus.CREATED)
-    public Widget updateWidget(@PathVariable Integer id, @RequestBody @Valid Widget widget) {
+    public Widget updateWidget(@PathVariable Integer id, @RequestBody @Valid Widget widget) throws CloneNotSupportedException {
         return service.update(id, widget);
     }
 
@@ -46,7 +46,7 @@ public class WidgetController {
 
     @GetMapping("/{id}")
     @ResponseStatus(HttpStatus.OK)
-    public Widget getWidget(@PathVariable Integer id) {
+    public Widget getWidget(@PathVariable Integer id) throws CloneNotSupportedException {
         return service.get(id);
     }
 
