@@ -1,8 +1,10 @@
 # widgetREST
 [![CircleCI](https://circleci.com/gh/EfoneMax/widgetREST.svg?style=svg)](https://app.circleci.com/pipelines/github/EfoneMax/widgetREST)
 
-
-Для фильтрации по области создано ограниченное поле 1000х1000х1000
+Особенности реализации:
+Считается, что у виджетов X и Y - координаты левого нижнего угла.
+Для фильтрации по области создано ограниченное поле 1000х1000х1000. 
+Отрицательные координаты виджетов обрабатываются корректно.
 
 requestBody
 [
