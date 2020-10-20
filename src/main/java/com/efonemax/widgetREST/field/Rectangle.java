@@ -1,11 +1,9 @@
 package com.efonemax.widgetREST.field;
 
-import lombok.Getter;
+import lombok.Data;
 import lombok.NoArgsConstructor;
-import lombok.Setter;
 
-@Getter
-@Setter
+@Data
 @NoArgsConstructor
 public class Rectangle implements Cloneable {
     private Point lowerLeftCorner;
@@ -30,7 +28,13 @@ public class Rectangle implements Cloneable {
     }
 
     public Rectangle clone() throws CloneNotSupportedException {
-        return (Rectangle) super.clone();
+        Rectangle newRectangle = new Rectangle();
+        newRectangle.setLowerLeftCorner(this.lowerLeftCorner.clone());
+        newRectangle.setUpperLeftCorner(this.upperLeftCorner.clone());
+        newRectangle.setUpperRightCorner(this.upperRightCorner.clone());
+        newRectangle.setLowerRightCorner(this.lowerRightCorner.clone());
+
+        return newRectangle;
     }
 
     public void makeItOnePointBigger() {
@@ -48,9 +52,9 @@ public class Rectangle implements Cloneable {
     }
 
     private void increaseRectangleCoordinatesBy500() {
-        this.getLowerLeftCorner().increasePCoordinatesBy500();
-        this.getUpperLeftCorner().increasePCoordinatesBy500();
-        this.getUpperRightCorner().increasePCoordinatesBy500();
-        this.getLowerRightCorner().increasePCoordinatesBy500();
+        this.getLowerLeftCorner().increasePointCoordinatesBy500();
+        this.getUpperLeftCorner().increasePointCoordinatesBy500();
+        this.getUpperRightCorner().increasePointCoordinatesBy500();
+        this.getLowerRightCorner().increasePointCoordinatesBy500();
     }
 }
