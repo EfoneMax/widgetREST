@@ -27,11 +27,11 @@ public final class Field {
         }
     }
 
-    public void eraseWidget(Widget widget) {
+    public void erase(Widget widget) {
         writeWidgetIdToField(widget, 0);
     }
 
-    public void writeWidget(Widget widget) {
+    public void write(Widget widget) {
         writeWidgetIdToField(widget, widget.getId());
     }
 
@@ -49,7 +49,7 @@ public final class Field {
         }
     }
 
-    public Set<Integer> getWidgetIdsByCoordinates(Point lowerLeftPoint, Point upperRightPoint) throws CloneNotSupportedException {
+    public Set<Integer> getWidgetIdsContainedInTheSubfield(Point lowerLeftPoint, Point upperRightPoint) throws CloneNotSupportedException {
         Rectangle rectangle = new Rectangle(lowerLeftPoint, upperRightPoint);
         Set<Integer> unfilteredWidgetIdsSet = getWidgetIdsByCoordinates(rectangle);
         Set<Integer> widgetIdsOutOfBounds = getWidgetIdsOutOfCoordinates(rectangle);
@@ -63,7 +63,6 @@ public final class Field {
         Set<Integer> widgetIds = new HashSet<>();
         for (int x = rectangle.getLowerLeftCorner().getX(); x < rectangle.getLowerLeftCorner().getX() + rectangle.getWidth(); x++) {
             for (int y = rectangle.getLowerLeftCorner().getY(); y < rectangle.getLowerLeftCorner().getY() + rectangle.getHeight(); y++) {
-                //получаем занятые z индексы
                 List<Integer> zIndexes = intArrayToList(fieldArray[x][y]);
                 widgetIds.addAll(zIndexes);
             }

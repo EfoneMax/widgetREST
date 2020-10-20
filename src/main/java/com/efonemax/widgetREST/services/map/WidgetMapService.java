@@ -42,10 +42,11 @@ public class WidgetMapService implements WidgetService {
     }
 
     @Override
-    public void delete(@Min(1) Integer id) {
-        Widget removedWidget = idWidgetMap.remove(id);
+    public synchronized void delete(@Min(1) Integer id) {
+        Widget widgetToDelete = idWidgetMap.remove(id);
         idZIndexMap.remove(id);
-        if (removedWidget.getZIndex() == maxZIndex.get()) {
+        field.erase(widgetToDelete);
+        if (widgetToDelete.getZIndex() == maxZIndex.get()) {
             updateMaxZIndexValue();
         }
     }
@@ -66,7 +67,7 @@ public class WidgetMapService implements WidgetService {
 
     @Override
     public List<Widget> filterWidgetsByCoordinates(Point lowerLeftPoint, Point upperRightPoint) throws CloneNotSupportedException {
-        Set<Integer> widgetIdsByCoordinates = field.getWidgetIdsByCoordinates(lowerLeftPoint, upperRightPoint);
+        Set<Integer> widgetIdsByCoordinates = field.getWidgetIdsContainedInTheSubfield(lowerLeftPoint, upperRightPoint);
         return idWidgetMap.entrySet().stream()
                 .filter(entry -> widgetIdsByCoordinates.contains(entry.getKey()))
                 .map(Map.Entry::getValue)
@@ -89,12 +90,12 @@ public class WidgetMapService implements WidgetService {
         updateZIndexes(widget);
         widget.setDateTime(LocalDateTime.now());
         idWidgetMap.put(widget.getId(), widget);
-        field.writeWidget(widget);
+        field.write(widget);
 
         return widget;
     }
 
-    private synchronized void updateMaxZIndexValue() {
+    private void updateMaxZIndexValue() {
         maxZIndex.set(idWidgetMap.values().stream()
                 .map(Widget::getZIndex)
                 .max(Integer::compareTo)
@@ -116,7 +117,7 @@ public class WidgetMapService implements WidgetService {
             if (idZIndexMap.containsValue(widget.getZIndex())) {
                 getKeyByValue(idZIndexMap, widget.getZIndex()).ifPresent(key -> {
                             Widget needToIncreaseZWidget = idWidgetMap.get(key);
-                            field.eraseWidget(needToIncreaseZWidget);
+                            field.erase(needToIncreaseZWidget);
                             needToIncreaseZWidget.setZIndex(widget.getZIndex() + 1);
                             createOrUpdate(needToIncreaseZWidget);
                         }
