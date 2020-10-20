@@ -3,7 +3,7 @@ package com.efonemax.widgetREST.field;
 import com.efonemax.widgetREST.domain.Widget;
 import lombok.NoArgsConstructor;
 
-import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -12,23 +12,7 @@ import java.util.stream.Collectors;
 @NoArgsConstructor
 public final class Field {
     private static volatile Field instance;
-    private List<List<List<Long>>> fieldList = new ArrayList<>();
-
-    {
-        List<Long> zInitialValues = new ArrayList<>();
-        for (int x = 0; x < 1000; x++) {
-            zInitialValues.add(x, 0L);
-        }
-
-        List<List<Long>> yInitialValues = new ArrayList<>();
-        for (int x = 0; x < 10000; x++) {
-            yInitialValues.add(x, zInitialValues);
-        }
-
-        for (int x = 0; x < 10000; x++) {
-            fieldList.add(x, yInitialValues);
-        }
-    }
+    private int[][][] fieldArray = new int[1000][1000][1000];
 
     public static Field getInstance() {
         Field result = instance;
@@ -43,49 +27,44 @@ public final class Field {
         }
     }
 
-    public synchronized void update(Widget widget) {
-        eraseWidget(widget);
-        writeWidget(widget);
+    public void eraseWidget(Widget widget) {
+        writeWidgetIdToField(widget, 0);
     }
 
-    private void eraseWidget(Widget widget) {
-        writeWidgetValue(widget, null);
+    public void writeWidget(Widget widget) {
+        writeWidgetIdToField(widget, widget.getId());
     }
 
-    private void writeWidget(Widget widget) {
-        writeWidgetValue(widget, widget.getId());
-    }
-
-    private void writeWidgetValue(Widget widget, Long value) {
+    private void writeWidgetIdToField(Widget widget, Integer widgetId) {
         int width = widget.getWidth();
         int height = widget.getHeight();
         int firstXPoint = widget.getXIndex();
         int firstYPoint = widget.getYIndex();
         int zPoint = widget.getZIndex();
 
-        for (int x = firstXPoint; x < width; x++) {
-            for (int y = firstYPoint; y < height; y++) {
-                fieldList.get(x).get(y).set(zPoint, value);
+        for (int x = firstXPoint; x <= firstXPoint + width; x++) {
+            for (int y = firstYPoint; y <= firstYPoint + height; y++) {
+                fieldArray[x][y][zPoint] = widgetId;
             }
         }
     }
 
-    public Set<Long> getWidgetIdsByCoordinates(Point lowerLeftPoint, Point upperRightPoint) throws CloneNotSupportedException {
+    public Set<Integer> getWidgetIdsByCoordinates(Point lowerLeftPoint, Point upperRightPoint) throws CloneNotSupportedException {
         Rectangle rectangle = new Rectangle(lowerLeftPoint, upperRightPoint);
-        Set<Long> unfilteredWidgetIdsSet = getWidgetIdsByCoordinates(rectangle);
-        Set<Long> widgetIdsOutOfBounds = getWidgetIdsOutOfCoordinates(rectangle);
+        Set<Integer> unfilteredWidgetIdsSet = getWidgetIdsByCoordinates(rectangle);
+        Set<Integer> widgetIdsOutOfBounds = getWidgetIdsOutOfCoordinates(rectangle);
 
         unfilteredWidgetIdsSet.removeAll(widgetIdsOutOfBounds);
 
         return unfilteredWidgetIdsSet;
     }
 
-    private Set<Long> getWidgetIdsByCoordinates(Rectangle rectangle) {
-        Set<Long> widgetIds = new HashSet<>();
-        for (int x = rectangle.getLowerLeftCorner().getX(); x < rectangle.getWidth(); x++) {
-            for (int y = rectangle.getLowerLeftCorner().getY(); y < rectangle.getHeight(); y++) {
+    private Set<Integer> getWidgetIdsByCoordinates(Rectangle rectangle) {
+        Set<Integer> widgetIds = new HashSet<>();
+        for (int x = rectangle.getLowerLeftCorner().getX(); x < rectangle.getLowerLeftCorner().getX() + rectangle.getWidth(); x++) {
+            for (int y = rectangle.getLowerLeftCorner().getY(); y < rectangle.getLowerLeftCorner().getY() + rectangle.getHeight(); y++) {
                 //получаем занятые z индексы
-                List<Long> zIndexes = fieldList.get(x).get(y);
+                List<Integer> zIndexes = intArrayToList(fieldArray[x][y]);
                 widgetIds.addAll(zIndexes);
             }
         }
@@ -93,18 +72,18 @@ public final class Field {
         return widgetIds;
     }
 
-    private Set<Long> getWidgetIdsOutOfCoordinates(Rectangle rectangle) throws CloneNotSupportedException {
+    private Set<Integer> getWidgetIdsOutOfCoordinates(Rectangle rectangle) throws CloneNotSupportedException {
         Rectangle biggerRectangle = rectangle.clone();
         biggerRectangle.makeItOnePointBigger();
 
         return getWidgetIdsOnPerimeter(biggerRectangle);
     }
 
-    private Set<Long> getWidgetIdsOnPerimeter(Rectangle rectangle) {
-        Set<Long> firstResult = getWidgetIdsInTheLine(rectangle.getLowerLeftCorner(), rectangle.getUpperLeftCorner());
-        Set<Long> secondResult = getWidgetIdsInTheLine(rectangle.getLowerLeftCorner(), rectangle.getUpperLeftCorner());
-        Set<Long> thirdResult = getWidgetIdsInTheLine(rectangle.getLowerLeftCorner(), rectangle.getUpperLeftCorner());
-        Set<Long> fourthResult = getWidgetIdsInTheLine(rectangle.getLowerLeftCorner(), rectangle.getUpperLeftCorner());
+    private Set<Integer> getWidgetIdsOnPerimeter(Rectangle rectangle) {
+        Set<Integer> firstResult = getWidgetIdsInTheLine(rectangle.getLowerLeftCorner(), rectangle.getUpperLeftCorner());
+        Set<Integer> secondResult = getWidgetIdsInTheLine(rectangle.getUpperLeftCorner(), rectangle.getUpperRightCorner());
+        Set<Integer> thirdResult = getWidgetIdsInTheLine(rectangle.getUpperRightCorner(), rectangle.getLowerRightCorner());
+        Set<Integer> fourthResult = getWidgetIdsInTheLine(rectangle.getLowerRightCorner(), rectangle.getLowerLeftCorner());
 
         firstResult.addAll(secondResult);
         firstResult.addAll(thirdResult);
@@ -113,20 +92,24 @@ public final class Field {
         return firstResult;
     }
 
-    private Set<Long> getWidgetIdsInTheLine(Point p1, Point p2) {
-        Set<Long> widgetIds = new HashSet<>();
+    private Set<Integer> getWidgetIdsInTheLine(Point p1, Point p2) {
+        Set<Integer> widgetIds = new HashSet<>();
 
         if (p1.getX() == p2.getX()) {
             for (int y = p1.getY(); y <= p2.getY(); y++) {
-                widgetIds.addAll(fieldList.get(p1.getX()).get(y));
+                widgetIds.addAll(intArrayToList(fieldArray[p1.getX()][y]));
             }
         } else if (p1.getY() == p2.getY()) {
             for (int x = p1.getX(); x <= p2.getX(); x++) {
-                widgetIds.addAll(fieldList.get(x).get(p1.getY()));
+                widgetIds.addAll(intArrayToList(fieldArray[x][p1.getY()]));
             }
         } else {
             throw new RuntimeException("The line between the points must be vertical or horizontal");
         }
         return widgetIds;
+    }
+
+    private List<Integer> intArrayToList(int[] array) {
+        return Arrays.stream(array).boxed().collect(Collectors.toList());
     }
 }

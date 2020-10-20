@@ -24,7 +24,7 @@ import java.time.LocalDateTime;
 @Table(name = "WIDGET")
 public class Widget implements Serializable {
     @Builder
-    public Widget(Long id, int xIndex, int yIndex, int zIndex, int width, int height, LocalDateTime dateTime) {
+    public Widget(Integer id, int xIndex, int yIndex, int zIndex, int width, int height, LocalDateTime dateTime) {
         this.id = id;
         this.xIndex = xIndex;
         this.yIndex = yIndex;
@@ -36,7 +36,7 @@ public class Widget implements Serializable {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    private Integer id;
 
     @Column(name = "X_INDEX")
     private int xIndex;

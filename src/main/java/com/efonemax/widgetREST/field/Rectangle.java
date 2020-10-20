@@ -20,11 +20,6 @@ public class Rectangle implements Cloneable {
         lowerRightCorner = new Point(upperRightCorner.getX(), lowerLeftCorner.getY());
     }
 
-    Rectangle(int lowerLeftCornerX, int lowerLeftCornerY, int upperRightCornerX, int upperRightCornerY) {
-        this(new Point(lowerLeftCornerX, lowerLeftCornerY), new Point(upperRightCornerX, upperRightCornerY));
-    }
-
-
     public int getWidth() {
         return Math.abs(lowerRightCorner.getX() - lowerLeftCorner.getX());
     }
@@ -48,16 +43,6 @@ public class Rectangle implements Cloneable {
         upperRightCorner.setY(upperRightCorner.getY() + 1);
 
         lowerRightCorner.setX(lowerRightCorner.getX() + 1);
-        lowerRightCorner.setY(lowerLeftCorner.getY() - 1);
-    }
-
-    private int addOneOrSubtract(int value) {
-        if (value < 0) {
-            value -= 1;
-        } else {
-            value += 1;
-        }
-
-        return value;
+        lowerRightCorner.setY(lowerRightCorner.getY() - 1);
     }
 }

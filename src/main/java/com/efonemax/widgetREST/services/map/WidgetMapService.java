@@ -22,8 +22,8 @@ import java.util.stream.Collectors;
 @Service
 @Profile({"default", "map"})
 public class WidgetMapService implements WidgetService {
-    private Map<Long, Widget> idWidgetMap = new ConcurrentHashMap<>();
-    private Map<Long, Integer> idZIndexMap = new ConcurrentHashMap<>();
+    private Map<Integer, Widget> idWidgetMap = new ConcurrentHashMap<>();
+    private Map<Integer, Integer> idZIndexMap = new ConcurrentHashMap<>();
     private AtomicInteger maxZIndex = new AtomicInteger();
     private Field field = Field.getInstance();
 
@@ -33,7 +33,7 @@ public class WidgetMapService implements WidgetService {
     }
 
     @Override
-    public Widget update(Long id, Widget widget) {
+    public Widget update(Integer id, Widget widget) {
         if (id == null) {
             throw new RuntimeException("Widget id cannot be empty");
         }
@@ -42,7 +42,7 @@ public class WidgetMapService implements WidgetService {
     }
 
     @Override
-    public void delete(@Min(1) long id) {
+    public void delete(@Min(1) Integer id) {
         Widget removedWidget = idWidgetMap.remove(id);
         idZIndexMap.remove(id);
         if (removedWidget.getZIndex() == maxZIndex.get()) {
@@ -51,7 +51,7 @@ public class WidgetMapService implements WidgetService {
     }
 
     @Override
-    public Widget get(@Min(1) long id) {
+    public Widget get(@Min(1) Integer id) {
         return idWidgetMap.get(id);
     }
 
@@ -66,15 +66,15 @@ public class WidgetMapService implements WidgetService {
 
     @Override
     public List<Widget> filterWidgetsByCoordinates(Point lowerLeftPoint, Point upperRightPoint) throws CloneNotSupportedException {
-        Set<Long> widgetIdsByCoordinates = field.getWidgetIdsByCoordinates(lowerLeftPoint, upperRightPoint);
+        Set<Integer> widgetIdsByCoordinates = field.getWidgetIdsByCoordinates(lowerLeftPoint, upperRightPoint);
         return idWidgetMap.entrySet().stream()
                 .filter(entry -> widgetIdsByCoordinates.contains(entry.getKey()))
                 .map(Map.Entry::getValue)
                 .collect(Collectors.toList());
     }
 
-    private Long getNextId() {
-        return idWidgetMap.keySet().isEmpty() ? 1L : Collections.max(idWidgetMap.keySet()) + 1;
+    private Integer getNextId() {
+        return idWidgetMap.keySet().isEmpty() ? 1 : Collections.max(idWidgetMap.keySet()) + 1;
     }
 
     private synchronized Widget createOrUpdate(Widget widget) {
@@ -89,7 +89,7 @@ public class WidgetMapService implements WidgetService {
         updateZIndexes(widget);
         widget.setDateTime(LocalDateTime.now());
         idWidgetMap.put(widget.getId(), widget);
-        field.update(widget);
+        field.writeWidget(widget);
 
         return widget;
     }
@@ -101,7 +101,7 @@ public class WidgetMapService implements WidgetService {
                 .get());
     }
 
-    private Optional<Long> getKeyByValue(Map<Long, ?> map, Object value) {
+    private Optional<Integer> getKeyByValue(Map<Integer, ?> map, Object value) {
         return map.entrySet()
                 .stream()
                 .filter(entry -> value.equals(entry.getValue()))
@@ -116,6 +116,7 @@ public class WidgetMapService implements WidgetService {
             if (idZIndexMap.containsValue(widget.getZIndex())) {
                 getKeyByValue(idZIndexMap, widget.getZIndex()).ifPresent(key -> {
                             Widget needToIncreaseZWidget = idWidgetMap.get(key);
+                            field.eraseWidget(needToIncreaseZWidget);
                             needToIncreaseZWidget.setZIndex(widget.getZIndex() + 1);
                             createOrUpdate(needToIncreaseZWidget);
                         }

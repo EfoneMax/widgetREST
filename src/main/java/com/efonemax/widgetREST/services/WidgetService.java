@@ -8,11 +8,11 @@ import java.util.List;
 public interface WidgetService {
     Widget create(Widget widget);
 
-    Widget update(Long id, Widget widget);
+    Widget update(Integer id, Widget widget);
 
-    void delete(long id);
+    void delete(Integer id);
 
-    Widget get(long id);
+    Widget get(Integer id);
 
     /*
      * pagination implementation

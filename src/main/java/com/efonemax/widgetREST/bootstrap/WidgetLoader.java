@@ -33,24 +33,25 @@ public class WidgetLoader implements ApplicationListener<ContextRefreshedEvent> 
                 .build();
 
         Widget thirdWidget = Widget.builder()
-                .xIndex(1)
-                .yIndex(1)
+                .xIndex(2)
+                .yIndex(4)
                 .zIndex(1)
                 .height(2)
                 .width(2)
                 .build();
 
         Widget fourthWidget = Widget.builder()
-                .xIndex(10)
-                .yIndex(10)
+                .xIndex(9)
+                .yIndex(9)
                 .zIndex(8)
-                .height(5)
-                .width(5)
+                .height(2)
+                .width(2)
                 .build();
 
         service.create(firstWidget);
         service.create(secondWidget);
         service.create(thirdWidget);
         service.create(fourthWidget);
+        System.out.println("Widgets loaded!");
     }
 }
